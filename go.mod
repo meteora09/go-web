@@ -1,3 +1,3 @@
-module goweb
+module github.com/meteora09/go-course
 
-go 1.21.0
+go 1.20
