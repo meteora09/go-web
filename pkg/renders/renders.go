@@ -1,4 +1,4 @@
-package main
+package renderers
 
 import (
 	"html/template"
