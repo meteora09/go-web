@@ -4,26 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/meteora09/go-web/pkg/handlers"
 )
 
 const port = ":8080"
 
 func main() {
-	http.HandleFunc("/", Home)
-	http.HandleFunc("/about", About)
+	http.HandleFunc("/", handlers.Home)
+	http.HandleFunc("/about", handlers.About)
 	http.HandleFunc("/div", Divide)
 	fmt.Printf("Starting app : %s%s", "http://localhost", port)
 	_ = http.ListenAndServe(port, nil)
 }
-
-//
-//
-//
-//
-//
-//
-//
-//
 
 func Divide(w http.ResponseWriter, r *http.Request) {
 	f, err := DeivdeValues(100.0, 10.0)

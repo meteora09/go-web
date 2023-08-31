@@ -2,12 +2,14 @@ package handlers
 
 import (
 	"net/http"
+
+	"github.com/meteora09/go-web/pkg/renders"
 )
 
 func Home(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "home.page.tmpl")
+	renders.RenderTemplate(w, "home.page.tmpl")
 }
 
 func About(w http.ResponseWriter, r *http.Request) {
-	RenderTemplate(w, "about.page.tmpl")
+	renders.RenderTemplate(w, "about.page.tmpl")
 }
