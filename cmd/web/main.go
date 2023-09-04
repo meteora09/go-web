@@ -3,17 +3,32 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/meteora09/go-web/pkg/config"
 	"github.com/meteora09/go-web/pkg/handlers"
+	"github.com/meteora09/go-web/pkg/renders"
 )
 
 const port = ":8080"
 
 func main() {
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
-	http.HandleFunc("/div", Divide)
+	var app config.AppConfig
+
+	tc, err := renders.CreateTemplateCache()
+	if err != nil {
+		log.Fatal("cannot create template cache")
+	}
+	app.TemplateCache = tc
+	app.UseCache = true
+
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
+	renders.NewTemplates(&app)
+
+	http.HandleFunc("/", handlers.Repo.Home)
+	http.HandleFunc("/about", handlers.Repo.About)
 	fmt.Printf("Starting app : %s%s", "http://localhost", port)
 	_ = http.ListenAndServe(port, nil)
 }

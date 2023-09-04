@@ -7,35 +7,52 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/meteora09/go-web/pkg/config"
+	"github.com/meteora09/go-web/pkg/models"
 )
 
-var tc = make(map[string]*template.Template)
+var app *config.AppConfig
 
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+// New Templates sets the config for the tempate package
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
+
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+
+	return td
+}
+
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 	// create a template cache
-	tc, err := createTemplateCache()
-	if err != nil {
-		log.Fatal(err)
+	var tc map[string]*template.Template
+	if app.UseCache {
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
 	}
 
 	// get requested template from cache
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatal(err)
+		log.Fatal("Could not get template from template cache")
 	}
 
 	buf := new(bytes.Buffer)
-	_ = t.Execute(buf, nil)
-	// render the template
 
-	parsedTemplate, _ := template.ParseFiles("./templates/"+t, "./templates/base.layout.tmpl")
-	err := parsedTemplate.Execute(w, nil)
+	td = AddDefaultData(td)
+
+	_ = t.Execute(buf, td)
+	// render the template
+	_, err := buf.WriteTo(w)
 	if err != nil {
-		fmt.Println("error parsing template:", err)
+		fmt.Println("Error writing template to browser", err)
 	}
+
 }
 
-func createTemplateCache() (map[string]*template.Template, error) {
+func CreateTemplateCache() (map[string]*template.Template, error) {
 	myCache := map[string]*template.Template{}
 
 	// get all of the files named *.page.tmpl from ./templates
@@ -44,14 +61,15 @@ func createTemplateCache() (map[string]*template.Template, error) {
 		return myCache, err
 	}
 
+	matches, err := filepath.Glob("./templates/*.layout.tmpl")
+	if err != nil {
+		return myCache, err
+	}
+
 	// range through all files ending with *.page.tmpl
 	for _, page := range pages {
 		name := filepath.Base(page)
 		ts, err := template.New(name).ParseFiles(page)
-		if err != nil {
-			return myCache, err
-		}
-		matches, err := filepath.Glob("./templages/*.layout.tmpl")
 		if err != nil {
 			return myCache, err
 		}
